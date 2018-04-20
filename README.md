@@ -61,12 +61,12 @@ Next create this INI file so that scanner code can connect to the db.
 You might want to create a ~/.pgpass file (google that format) with the
 same info so you don't get prompted all over the place when you run psql.
 
-`# dwh-tls-scan.ini
-[POSTGRES]
-password = your-db-user-password
-host = your-postgres-host
-port = 5432
-db_name = scans`
+`# dwh-tls-scan.ini`
+`[POSTGRES]`
+`password = your-db-user-password`
+`host = your-postgres-host`
+`port = 5432`
+`db_name = scans`
 
 ## Scanning
 
