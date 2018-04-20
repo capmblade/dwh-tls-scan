@@ -61,12 +61,14 @@ Next create this INI file so that scanner code can connect to the db.
 You might want to create a ~/.pgpass file (google that format) with the
 same info so you don't get prompted all over the place when you run psql.
 
-`# dwh-tls-scan.ini`
-`[POSTGRES]`
-`password = your-db-user-password`
-`host = your-postgres-host`
-`port = 5432`
-`db_name = scans`
+```
+# dwh-tls-scan.ini
+[POSTGRES]
+password = your-db-user-password
+host = your-postgres-host
+port = 5432
+db_name = scans
+```
 
 ## Scanning
 
@@ -79,7 +81,7 @@ First you'll initialize an empty database table with the idb.py tool.
 By default it will choose a name like 'i<year><quarter>', but you can
 specify whatever you like.
 
-`% python3 idb.py -I scan1``
+`% python3 idb.py -I scan1`
 
 Next, go get a giant hosts file hosts files from project sonar at this URL:
 https://scans.io/study/sonar.ssl
@@ -96,15 +98,19 @@ watch out there will be duplicates, which is not helpful in our case.  Use the
 randomhosts.py tool to grab, say, 100,000 addresses randomly from the file and
 import them into the database (by default does 5%).
 
-`% python randomhosts.py -n 100k ../data/2018*hosts |
+```
+% python randomhosts.py -n 100k ../data/2018*hosts |
      cut -d, -f1 | sort -u |
-     psql scans -c "COPY scan1` (addr) FROM stdin;"`
+     psql scans -c "COPY scan1 (addr) FROM stdin;"
+```
 
 Ideally you'll see something like
 
-'Line Estimate 65466818
+```
+Line Estimate 65466818
 Pulling 100000 lines from input.
-COPY 100102'
+COPY 100102
+```
 
 Which indicates success. 
 
@@ -112,14 +118,16 @@ Next step: For whatever reason, between 5-15% of hosts that Project Sonar
 found somehow disappear or are unreachable for me. So the tcpscan.py figures
 out what's still there from a TCP perspective.
 
-`% python3 tcpscan.py -T scan1``
+`% python3 tcpscan.py -T scan1`
 
 You'll see the TCP scanner start chugging away on the database.
 
-`TCPSCAN 0:04:45:31 q=99,863 o=0 f=86.19%   5/s Threads |__A_AAA_A_|
+```
+TCPSCAN 0:04:45:31 q=99,863 o=0 f=86.19%   5/s Threads |__A_AAA_A_|
 TCPSCAN 0:04:17:38 q=99,805 o=0 f=86.87%   6/s Threads |AA_A___A_A|
 TCPSCAN 0:03:23:11 q=99,685 o=0 f=89.21%   8/s Threads |AAAAAAAAAA|
-`
+```
+
 You can stop it via ^C, or create a file called 'stop' in the same
 directory and that will stop the main loop and commit the changes.
 
@@ -157,10 +165,12 @@ the REAL database that we'll use for SSL scanning.
 
 Copy the rank database (_r) into the real database.
 
-`% psql scans
+```
+% psql scans
    => INSERT INTO scan1 (addr,alexa_rank,hostname,tcp_there)
             SELECT DISTINCT ON (addr) addr,rank,hostname,tcp_there
-                    FROM scan1_r WHERE tcp_there;`
+                    FROM scan1_r WHERE tcp_there;
+```                    
                     
 Now we're ready to actually run an SSL scan.
 
@@ -202,7 +212,7 @@ If you specify -o you'll get a copy in whatever file you specify.
 
 The report looks like this:
 
-
+```
 Report: 2018-04-20: TABLE = 'scan1'
 -------------------------------------------------------
 
@@ -216,6 +226,7 @@ F5 Hosts                                :        195 (0.41%)
 Akamai Hosts                            :      11564 (24.54%)
 Cloudflare Hosts                        :        497 (1.05%)
 Forward Secrecy                         :      41877 (88.87%)
+```
 
 And then there's a bunch of breakdowns by server type, and a 
 count of certificate authorities and cipher preferences. And
