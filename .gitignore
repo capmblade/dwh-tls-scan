@@ -6,6 +6,11 @@
 *.pot
 *.py[co]
 *.retry
+*.log
+*.ini
+openssl
+libcrypto.so*
+libssl.so*
 .tox/
 __pycache__
 MANIFEST
